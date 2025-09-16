@@ -3,7 +3,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Box } from '@mui/material';
 import { SonarQubeProvider } from './contexts/SonarQubeContext';
 import AppRouter from './components/AppRouter';
-import NavBar from './components/NavBar';
 import './App.css';
 
 const theme = createTheme({
@@ -89,7 +88,6 @@ function App() {
       <CssBaseline />
       <SonarQubeProvider>
         <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-          <NavBar />
           <AppRouter />
         </Box>
       </SonarQubeProvider>

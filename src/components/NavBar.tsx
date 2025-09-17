@@ -76,6 +76,21 @@ const NavBar: React.FC = () => {
 
           <Button
             component={Link}
+            to="/cwe-browser"
+            startIcon={<BugReport />}
+            color="inherit"
+            sx={{
+              bgcolor: isActive('/cwe-browser') ? 'rgba(255,255,255,0.1)' : 'transparent',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.1)',
+              },
+            }}
+          >
+            CWE/CVE Browser
+          </Button>
+
+          <Button
+            component={Link}
             to="/test"
             startIcon={<BugReport />}
             color="inherit"
@@ -133,6 +148,21 @@ const NavBar: React.FC = () => {
           >
             Simple Test
           </Button>
+
+          <Button
+            component={Link}
+            to="/security-reports"
+            startIcon={<Security />}
+            color="inherit"
+            sx={{
+              bgcolor: isActive('/security-reports') ? 'rgba(255,255,255,0.1)' : 'transparent',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.1)',
+              },
+            }}
+          >
+            Security Reports
+          </Button>
         </Box>
 
         {/* Mobile menu */}
@@ -167,6 +197,10 @@ const NavBar: React.FC = () => {
               <Security sx={{ mr: 1 }} />
               CWE Analysis
             </MenuItem>
+            <MenuItem component={Link} to="/cwe-browser" onClick={handleMenuClose}>
+              <BugReport sx={{ mr: 1 }} />
+              CWE/CVE Browser
+            </MenuItem>
             <MenuItem component={Link} to="/test" onClick={handleMenuClose}>
               <BugReport sx={{ mr: 1 }} />
               Test Connection
@@ -182,6 +216,10 @@ const NavBar: React.FC = () => {
             <MenuItem component={Link} to="/simple-test" onClick={handleMenuClose}>
               <BugReport sx={{ mr: 1 }} />
               Simple Test
+            </MenuItem>
+            <MenuItem component={Link} to="/security-reports" onClick={handleMenuClose}>
+              <Security sx={{ mr: 1 }} />
+              Security Reports
             </MenuItem>
           </Menu>
         </Box>

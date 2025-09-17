@@ -80,13 +80,19 @@ const CweAnalysis: React.FC = () => {
 
   useEffect(() => {
     loadCweData();
-  }, []);
+  }, [apiService]);
 
   const loadCweData = async () => {
+    if (!apiService) {
+      setError('SonarQube API service not available. Please connect first.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.getCweAnalysisData();
+      const data = await apiService.getEnhancedCweAnalysisData();
       setCweData(data);
     } catch (err) {
       setError('Failed to load CWE analysis data');
@@ -151,11 +157,14 @@ const CweAnalysis: React.FC = () => {
   const renderStatistics = () => {
     if (!cweData) return null;
 
-    const { cweStatistics } = cweData;
+    const blockerIssues = cweData.issues.filter(i => i.severity === 'BLOCKER').length;
+    const vulnerabilities = cweData.issues.filter(i => i.type === 'VULNERABILITY').length;
+    const securityHotspots = (cweData.cweStatistics as any).securityHotspots || 0;
+    const securityRules = (cweData.cweStatistics as any).securityRules || 0;
 
     return (
       <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
@@ -167,41 +176,67 @@ const CweAnalysis: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
                 Issues with CWE
               </Typography>
-              <Typography variant="h4" color="primary">
+              <Typography variant="h4" color={cweData.issuesWithCwe > 0 ? "primary" : "textSecondary"}>
                 {cweData.issuesWithCwe}
               </Typography>
+              {cweData.issuesWithCwe === 0 && (
+                <Typography variant="caption" color="textSecondary">
+                  No CWE mappings found
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                CWE Categories
+                Vulnerabilities
               </Typography>
-              <Typography variant="h4">
-                {Object.keys(cweStatistics.cweCounts).length}
+              <Typography variant="h4" color="error">
+                {vulnerabilities}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                CWE Coverage
+                Blocker Issues
               </Typography>
-              <Typography variant="h4">
-                {cweData.totalIssues > 0 
-                  ? `${((cweData.issuesWithCwe / cweData.totalIssues) * 100).toFixed(1)}%`
-                  : '0%'
-                }
+              <Typography variant="h4" color="error">
+                {blockerIssues}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Security Hotspots
+              </Typography>
+              <Typography variant="h4" color="warning.main">
+                {securityHotspots}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Security Rules
+              </Typography>
+              <Typography variant="h4" color="info.main">
+                {securityRules}
               </Typography>
             </CardContent>
           </Card>
@@ -213,34 +248,82 @@ const CweAnalysis: React.FC = () => {
   const renderTopCweCategories = () => {
     if (!cweData) return null;
 
+    const alternativeData = (cweData.cweStatistics as any).alternativeCweData;
+    const hasCweData = cweData.cweStatistics.topCweCategories.length > 0;
+    const hasAlternativeData = alternativeData && (alternativeData.securityIssues > 0 || alternativeData.vulnerabilityIssues > 0);
+
     return (
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Top CWE Categories
+            Security Analysis
           </Typography>
-          <Box sx={{ mt: 2 }}>
-            {cweData.cweStatistics.topCweCategories.map((category, index) => (
-              <Box key={category.cwe} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ minWidth: 80 }}>
-                  {category.cwe}
-                </Typography>
-                <Box sx={{ flexGrow: 1, mx: 2 }}>
-                  <Box
-                    sx={{
-                      height: 8,
-                      backgroundColor: 'primary.main',
-                      borderRadius: 1,
-                      width: `${category.percentage}%`
-                    }}
-                  />
+          {(() => {
+            if (hasCweData) {
+              return (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    CWE Categories
+                  </Typography>
+                  {cweData.cweStatistics.topCweCategories.map((category, index) => (
+                    <Box key={category.cwe} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" sx={{ minWidth: 80 }}>
+                        {category.cwe}
+                      </Typography>
+                      <Box sx={{ flexGrow: 1, mx: 2 }}>
+                        <Box
+                          sx={{
+                            height: 8,
+                            backgroundColor: 'primary.main',
+                            borderRadius: 1,
+                            width: `${category.percentage}%`
+                          }}
+                        />
+                      </Box>
+                      <Typography variant="body2" color="textSecondary">
+                        {category.count} ({category.percentage.toFixed(1)}%)
+                      </Typography>
+                    </Box>
+                  ))}
                 </Box>
-                <Typography variant="body2" color="textSecondary">
-                  {category.count} ({category.percentage.toFixed(1)}%)
+              );
+            }
+            
+            if (hasAlternativeData) {
+              return (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Security Issues Found
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="primary">
+                      Security-tagged Issues: {alternativeData.securityIssues}
+                    </Typography>
+                    <Typography variant="body2" color="error">
+                      Vulnerabilities: {alternativeData.vulnerabilityIssues}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="textSecondary">
+                    CWE mappings not available, but security issues were found using alternative methods.
+                  </Typography>
+                </Box>
+              );
+            }
+            
+            return (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                  No security issues or CWE mappings found. This could be due to:
                 </Typography>
+                <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                  <li>No security rules activated in quality profile</li>
+                  <li>Rule details not available in SonarQube API</li>
+                  <li>API permissions limitations</li>
+                  <li>No security issues in current project</li>
+                </ul>
               </Box>
-            ))}
-          </Box>
+            );
+          })()}
         </CardContent>
       </Card>
     );
@@ -486,41 +569,209 @@ const CweAnalysis: React.FC = () => {
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={tabValue} onChange={handleTabChange}>
-          <Tab label="Overview" />
+          <Tab label="Analysis Dashboard" />
           <Tab label="Issues" />
-          <Tab label="Statistics" />
         </Tabs>
       </Box>
 
       <TabPanel value={tabValue} index={0}>
         {renderStatistics()}
         <Box sx={{ mt: 3 }}>
-          {renderTopCweCategories()}
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              {renderTopCweCategories()}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Security Distribution
+                  </Typography>
+                  {(() => {
+                    if (cweData.cweStatistics.topCweCategories.length > 0) {
+                      return (
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            CWE Categories
+                          </Typography>
+                          {cweData.cweStatistics.topCweCategories.map((category, index) => (
+                            <Box key={category.cwe} sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                              <Typography variant="body2" sx={{ minWidth: 80 }}>
+                                {category.cwe}
+                              </Typography>
+                              <Box sx={{ flexGrow: 1, mx: 2 }}>
+                                <Box
+                                  sx={{
+                                    height: 8,
+                                    backgroundColor: 'primary.main',
+                                    borderRadius: 1,
+                                    width: `${category.percentage}%`
+                                  }}
+                                />
+                              </Box>
+                              <Typography variant="body2" color="textSecondary">
+                                {category.count} ({category.percentage.toFixed(1)}%)
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      );
+                    }
+                    
+                    if ((cweData.cweStatistics as any).alternativeCweData) {
+                      return (
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Security Issue Types
+                          </Typography>
+                          <Box sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ minWidth: 120 }}>
+                              Security Issues
+                            </Typography>
+                            <Box sx={{ flexGrow: 1, mx: 2 }}>
+                              <Box
+                                sx={{
+                                  height: 8,
+                                  backgroundColor: 'primary.main',
+                                  borderRadius: 1,
+                                  width: '100%'
+                                }}
+                              />
+                            </Box>
+                            <Typography variant="body2" color="textSecondary">
+                              {(cweData.cweStatistics as any).alternativeCweData.securityIssues}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ minWidth: 120 }}>
+                              Vulnerabilities
+                            </Typography>
+                            <Box sx={{ flexGrow: 1, mx: 2 }}>
+                              <Box
+                                sx={{
+                                  height: 8,
+                                  backgroundColor: 'error.main',
+                                  borderRadius: 1,
+                                  width: '100%'
+                                }}
+                              />
+                            </Box>
+                            <Typography variant="body2" color="textSecondary">
+                              {(cweData.cweStatistics as any).alternativeCweData.vulnerabilityIssues}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      );
+                    }
+                    
+                    return (
+                      <Typography variant="body2" color="textSecondary">
+                        No security data available. This could be due to:
+                        <ul>
+                          <li>No security rules activated in quality profile</li>
+                          <li>Rule details not available in SonarQube</li>
+                          <li>API permissions limitations</li>
+                        </ul>
+                      </Typography>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Security Analysis Summary
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="primary">
+                          {cweData.totalIssues}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Total Issues
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="error">
+                          {cweData.issues.filter(i => i.severity === 'BLOCKER').length}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Blocker Issues
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="warning.main">
+                          {cweData.issues.filter(i => i.severity === 'MAJOR').length}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Major Issues
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="info.main">
+                          {cweData.issues.filter(i => i.type === 'VULNERABILITY').length}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Vulnerabilities
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Security Rules & Hotspots
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="warning.main">
+                          {(cweData.cweStatistics as any).securityHotspots || 0}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Security Hotspots
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          Areas requiring security review
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="info.main">
+                          {(cweData.cweStatistics as any).securityRules || 0}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Security Rules Available
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          Rules tagged with security
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </Box>
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>
         {renderIssuesTable()}
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={2}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            {renderTopCweCategories()}
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  CWE Distribution
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Detailed CWE distribution charts would go here
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
       </TabPanel>
     </Box>
   );

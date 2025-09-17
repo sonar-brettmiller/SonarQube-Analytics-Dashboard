@@ -93,6 +93,9 @@ export interface SonarQubeRule {
   severity: string;
   type: string;
   tags: string[];
+  // Optional security standards metadata returned by /api/rules/search when requesting fields
+  // Example shape: { cwe: ["79","89"], owaspTop10: ["a3"], sonarsourceSecurity: ["xss"] }
+  securityStandards?: Record<string, string[] | string>;
 }
 
 // CWE-specific interfaces

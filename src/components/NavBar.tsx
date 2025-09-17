@@ -14,6 +14,7 @@ import {
   BugReport,
   Code,
   Assessment,
+  Security,
   Menu as MenuIcon,
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
@@ -56,6 +57,21 @@ const NavBar: React.FC = () => {
             }}
           >
             Dashboard
+          </Button>
+
+          <Button
+            component={Link}
+            to="/cwe-analysis"
+            startIcon={<Security />}
+            color="inherit"
+            sx={{
+              bgcolor: isActive('/cwe-analysis') ? 'rgba(255,255,255,0.1)' : 'transparent',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.1)',
+              },
+            }}
+          >
+            CWE Analysis
           </Button>
 
           <Button
@@ -146,6 +162,10 @@ const NavBar: React.FC = () => {
             <MenuItem component={Link} to="/" onClick={handleMenuClose}>
               <Dashboard sx={{ mr: 1 }} />
               Dashboard
+            </MenuItem>
+            <MenuItem component={Link} to="/cwe-analysis" onClick={handleMenuClose}>
+              <Security sx={{ mr: 1 }} />
+              CWE Analysis
             </MenuItem>
             <MenuItem component={Link} to="/test" onClick={handleMenuClose}>
               <BugReport sx={{ mr: 1 }} />

@@ -95,6 +95,46 @@ export interface SonarQubeRule {
   tags: string[];
 }
 
+// CWE-specific interfaces
+export interface CweRule extends SonarQubeRule {
+  cweTags: string[];
+  cweNumbers: string[];
+}
+
+export interface CweIssue extends SonarQubeIssue {
+  ruleDetails?: CweRule;
+  cweNumbers: string[];
+  cweTags: string[];
+}
+
+export interface CweAnalysisData {
+  issues: CweIssue[];
+  cweStatistics: CweStatistics;
+  totalIssues: number;
+  issuesWithCwe: number;
+  projectKey?: string;
+}
+
+export interface CweStatistics {
+  totalCweIssues: number;
+  cweCounts: Record<string, number>;
+  cweBySeverity: Record<string, Record<string, number>>;
+  cweByType: Record<string, Record<string, number>>;
+  topCweCategories: Array<{
+    cwe: string;
+    count: number;
+    percentage: number;
+  }>;
+}
+
+export interface CweFilterOptions {
+  cweNumbers?: string[];
+  severities?: string[];
+  types?: string[];
+  projects?: string[];
+  searchTerm?: string;
+}
+
 export interface SonarQubeLanguage {
   key: string;
   name: string;

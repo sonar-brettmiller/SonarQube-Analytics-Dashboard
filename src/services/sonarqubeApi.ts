@@ -11,7 +11,11 @@ import type {
   SonarQubeWebhook,
   DashboardMetrics,
   ProjectSummary,
-  ReportData
+  ReportData,
+  CweRule,
+  CweIssue,
+  CweAnalysisData,
+  CweStatistics
 } from '../types/sonarqube';
 
 class SonarQubeApiService {
@@ -863,6 +867,156 @@ class SonarQubeApiService {
   private async getTopIssues() {
     const issuesResponse = await this.getIssues(undefined, 10);
     return issuesResponse.issues;
+  }
+
+  // CWE Analysis Methods
+  async getRuleDetails(ruleKey: string): Promise<CweRule | null> {
+    try {
+      const response = await this.api.get('/rules/show', {
+        params: { key: ruleKey }
+      });
+      
+      const rule = response.data.rule;
+      if (!rule) {
+        return null;
+      }
+
+      // Extract CWE tags from the rule's tags
+      const cweTags = rule.tags?.filter((tag: string) => 
+        tag.toLowerCase().includes('cwe') || tag.toLowerCase().includes('security')
+      ) || [];
+      
+      const cweNumbers = cweTags
+        .filter((tag: string) => tag.toLowerCase().startsWith('cwe-'))
+        .map((tag: string) => tag.toUpperCase());
+
+      return {
+        ...rule,
+        cweTags,
+        cweNumbers
+      };
+    } catch (error) {
+      console.warn(`Could not fetch rule details for ${ruleKey}:`, error);
+      return null;
+    }
+  }
+
+  async getCweMappedIssues(projectKey?: string, pageSize: number = 100): Promise<CweIssue[]> {
+    try {
+      // Get issues for the project
+      const issuesResponse = await this.getIssues(projectKey, pageSize);
+      const issues = issuesResponse.issues;
+
+      // Get unique rule keys from issues
+      const uniqueRuleKeys = [...new Set(issues.map(issue => issue.rule))];
+      
+      // Fetch rule details for all unique rules
+      const ruleDetailsPromises = uniqueRuleKeys.map(ruleKey => 
+        this.getRuleDetails(ruleKey).catch(() => null)
+      );
+      
+      const ruleDetails = await Promise.all(ruleDetailsPromises);
+      const ruleMap = new Map<string, CweRule>();
+      
+      ruleDetails.forEach((rule, index) => {
+        if (rule) {
+          ruleMap.set(uniqueRuleKeys[index], rule);
+        }
+      });
+
+      // Map issues with CWE information
+      const cweIssues: CweIssue[] = issues.map(issue => {
+        const ruleDetails = ruleMap.get(issue.rule);
+        const cweNumbers = ruleDetails?.cweNumbers || [];
+        const cweTags = ruleDetails?.cweTags || [];
+
+        return {
+          ...issue,
+          ruleDetails,
+          cweNumbers,
+          cweTags
+        };
+      });
+
+      return cweIssues;
+    } catch (error) {
+      console.error('Error fetching CWE mapped issues:', error);
+      return [];
+    }
+  }
+
+  async getCweAnalysisData(projectKey?: string, pageSize: number = 100): Promise<CweAnalysisData | null> {
+    try {
+      const cweIssues = await this.getCweMappedIssues(projectKey, pageSize);
+      const issuesWithCwe = cweIssues.filter(issue => issue.cweNumbers.length > 0);
+      
+      const cweStatistics = this.calculateCweStatistics(cweIssues);
+
+      return {
+        issues: cweIssues,
+        cweStatistics,
+        totalIssues: cweIssues.length,
+        issuesWithCwe: issuesWithCwe.length,
+        projectKey
+      };
+    } catch (error) {
+      console.error('Error fetching CWE analysis data:', error);
+      return null;
+    }
+  }
+
+  private calculateCweStatistics(issues: CweIssue[]): CweStatistics {
+    const cweCounts: Record<string, number> = {};
+    const cweBySeverity: Record<string, Record<string, number>> = {};
+    const cweByType: Record<string, Record<string, number>> = {};
+
+    issues.forEach(issue => {
+      issue.cweNumbers.forEach(cwe => {
+        // Count CWE occurrences
+        cweCounts[cwe] = (cweCounts[cwe] || 0) + 1;
+
+        // Count by severity
+        if (!cweBySeverity[cwe]) {
+          cweBySeverity[cwe] = {};
+        }
+        cweBySeverity[cwe][issue.severity] = (cweBySeverity[cwe][issue.severity] || 0) + 1;
+
+        // Count by type
+        if (!cweByType[cwe]) {
+          cweByType[cwe] = {};
+        }
+        cweByType[cwe][issue.type] = (cweByType[cwe][issue.type] || 0) + 1;
+      });
+    });
+
+    // Calculate top CWE categories
+    const totalCweIssues = Object.values(cweCounts).reduce((sum, count) => sum + count, 0);
+    const topCweCategories = Object.entries(cweCounts)
+      .map(([cwe, count]) => ({
+        cwe,
+        count,
+        percentage: totalCweIssues > 0 ? (count / totalCweIssues) * 100 : 0
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return {
+      totalCweIssues,
+      cweCounts,
+      cweBySeverity,
+      cweByType,
+      topCweCategories
+    };
+  }
+
+  async getCweStatistics(projectKey?: string): Promise<CweStatistics | null> {
+    try {
+      const cweIssues = await this.getCweMappedIssues(projectKey, 1000);
+      return this.calculateCweStatistics(cweIssues);
+    } catch (error) {
+      console.error('Error fetching CWE statistics:', error);
+      return null;
+    }
   }
 }
 

@@ -1,0 +1,480 @@
+{
+  "issues": [
+    {
+      "key": "AZkvb9UwRc7MnfGEjnLM",
+      "rule": "jssecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+      "project": "sonar-brettmiller_sonar-demo-microservices",
+      "line": 142,
+      "hash": "d88c0dabccf5bcabd78d142835db55cd",
+      "textRange": {
+        "startLine": 142,
+        "endLine": 142,
+        "startOffset": 11,
+        "endOffset": 14
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 142,
+                "endLine": 142,
+                "startOffset": 11,
+                "endOffset": 14
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 142,
+                "endLine": 142,
+                "startOffset": 15,
+                "endOffset": 20
+              },
+              "msg": "A malicious value was previously assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 140,
+                "endLine": 140,
+                "startOffset": 14,
+                "endOffset": 19
+              },
+              "msg": "A malicious value can be assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 140,
+                "endLine": 140,
+                "startOffset": 22,
+                "endOffset": 125
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 140,
+                "endLine": 140,
+                "startOffset": 80,
+                "endOffset": 88
+              },
+              "msg": "A malicious value was previously assigned to field ‘username’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 128,
+                "endLine": 128,
+                "startOffset": 12,
+                "endOffset": 20
+              },
+              "msg": "A malicious value can be assigned to field ‘username’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 128,
+                "endLine": 128,
+                "startOffset": 12,
+                "endOffset": 20
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "assignee": "brett.miller-Lhx3V@saml-3293ffc0-157d-499e-968b-c688dc4025b4",
+      "author": "brett.miller@sonarsource.com",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2025-09-09T15:29:29+0000",
+      "updateDate": "2025-09-09T17:04:14+0000",
+      "type": "VULNERABILITY",
+      "organization": "sonar-brettmiller",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "BLOCKER"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "sonar-demo-microservices",
+      "cweNumbers": [],
+      "cweTags": []
+    },
+    {
+      "key": "AZkvb9UwRc7MnfGEjnLN",
+      "rule": "jssecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+      "project": "sonar-brettmiller_sonar-demo-microservices",
+      "line": 186,
+      "hash": "19074c8946225f448d5fa3bdfda21ce3",
+      "textRange": {
+        "startLine": 186,
+        "endLine": 186,
+        "startOffset": 7,
+        "endOffset": 10
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 186,
+                "endLine": 186,
+                "startOffset": 7,
+                "endOffset": 10
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 186,
+                "endLine": 186,
+                "startOffset": 11,
+                "endOffset": 16
+              },
+              "msg": "A malicious value was previously assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 184,
+                "endLine": 184,
+                "startOffset": 10,
+                "endOffset": 15
+              },
+              "msg": "A malicious value can be assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 184,
+                "endLine": 184,
+                "startOffset": 18,
+                "endOffset": 70
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 184,
+                "endLine": 184,
+                "startOffset": 59,
+                "endOffset": 67
+              },
+              "msg": "A malicious value was previously assigned to field ‘username’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 181,
+                "endLine": 181,
+                "startOffset": 12,
+                "endOffset": 20
+              },
+              "msg": "A malicious value can be assigned to field ‘username’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 181,
+                "endLine": 181,
+                "startOffset": 12,
+                "endOffset": 20
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "assignee": "brett.miller-Lhx3V@saml-3293ffc0-157d-499e-968b-c688dc4025b4",
+      "author": "brett.miller@sonarsource.com",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2025-09-09T15:29:29+0000",
+      "updateDate": "2025-09-09T17:04:14+0000",
+      "type": "VULNERABILITY",
+      "organization": "sonar-brettmiller",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "BLOCKER"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "sonar-demo-microservices",
+      "cweNumbers": [],
+      "cweTags": []
+    },
+    {
+      "key": "AZkvb9UwRc7MnfGEjnLP",
+      "rule": "jssecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+      "project": "sonar-brettmiller_sonar-demo-microservices",
+      "line": 259,
+      "hash": "31cc1908c2ebe5bd63d48a1652d45bb0",
+      "textRange": {
+        "startLine": 259,
+        "endLine": 259,
+        "startOffset": 7,
+        "endOffset": 10
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 259,
+                "endLine": 259,
+                "startOffset": 7,
+                "endOffset": 10
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 259,
+                "endLine": 259,
+                "startOffset": 11,
+                "endOffset": 16
+              },
+              "msg": "A malicious value was previously assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 257,
+                "endLine": 257,
+                "startOffset": 10,
+                "endOffset": 15
+              },
+              "msg": "A malicious value can be assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 257,
+                "endLine": 257,
+                "startOffset": 18,
+                "endOffset": 56
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 257,
+                "endLine": 257,
+                "startOffset": 52,
+                "endOffset": 54
+              },
+              "msg": "A malicious value was previously assigned to field ‘id’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 254,
+                "endLine": 254,
+                "startOffset": 12,
+                "endOffset": 14
+              },
+              "msg": "A malicious value can be assigned to field ‘id’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 254,
+                "endLine": 254,
+                "startOffset": 12,
+                "endOffset": 14
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "assignee": "brett.miller-Lhx3V@saml-3293ffc0-157d-499e-968b-c688dc4025b4",
+      "author": "brett.miller@sonarsource.com",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2025-09-09T15:29:29+0000",
+      "updateDate": "2025-09-09T17:04:14+0000",
+      "type": "VULNERABILITY",
+      "organization": "sonar-brettmiller",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "BLOCKER"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "sonar-demo-microservices",
+      "cweNumbers": [],
+      "cweTags": []
+    },
+    {
+      "key": "AZkvb9UwRc7MnfGEjnLO",
+      "rule": "jssecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+      "project": "sonar-brettmiller_sonar-demo-microservices",
+      "line": 308,
+      "hash": "670c81644a8ef49167c9db8c5d0b394e",
+      "textRange": {
+        "startLine": 308,
+        "endLine": 308,
+        "startOffset": 7,
+        "endOffset": 10
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 308,
+                "endLine": 308,
+                "startOffset": 7,
+                "endOffset": 10
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 308,
+                "endLine": 308,
+                "startOffset": 11,
+                "endOffset": 16
+              },
+              "msg": "A malicious value was previously assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 306,
+                "endLine": 306,
+                "startOffset": 10,
+                "endOffset": 15
+              },
+              "msg": "A malicious value can be assigned to field ‘query’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 306,
+                "endLine": 306,
+                "startOffset": 18,
+                "endOffset": 105
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 306,
+                "endLine": 306,
+                "startOffset": 77,
+                "endOffset": 78
+              },
+              "msg": "A malicious value was previously assigned to field ‘q’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 303,
+                "endLine": 303,
+                "startOffset": 12,
+                "endOffset": 13
+              },
+              "msg": "A malicious value can be assigned to field ‘q’"
+            },
+            {
+              "component": "sonar-brettmiller_sonar-demo-microservices:backend/server.js",
+              "textRange": {
+                "startLine": 303,
+                "endLine": 303,
+                "startOffset": 12,
+                "endOffset": 13
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "assignee": "brett.miller-Lhx3V@saml-3293ffc0-157d-499e-968b-c688dc4025b4",
+      "author": "brett.miller@sonarsource.com",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2025-09-09T15:29:29+0000",
+      "updateDate": "2025-09-09T17:04:14+0000",
+      "type": "VULNERABILITY",
+      "organization": "sonar-brettmiller",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "BLOCKER"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "projectName": "sonar-demo-microservices",
+      "cweNumbers": [],
+      "cweTags": []
+    }
+  ],
+  "statistics": {
+    "totalCweIssues": 0,
+    "cweCounts": {},
+    "cweBySeverity": {},
+    "cweByType": {},
+    "topCweCategories": []
+  },
+  "timestamp": "2025-09-17T15:43:24.961Z"
+}

@@ -24,9 +24,6 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { useSonarQube } from '../contexts/SonarQubeContext';
-// import ExecutiveReport from './reports/ExecutiveReport';
-// import TechnicalReport from './reports/TechnicalReport';
-// import ComplianceReport from './reports/ComplianceReport';
 
 interface TabPanelProps {
   children?: React.ReactNode;

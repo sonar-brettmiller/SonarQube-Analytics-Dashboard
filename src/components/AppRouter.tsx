@@ -1,8 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
-import SimpleDashboard from './SimpleDashboard';
-import EnhancedDashboard from './EnhancedDashboard';
+import Dashboard from './Dashboard';
 import TestConnection from './TestConnection';
 import ProjectDebug from './ProjectDebug';
 import ApiDebug from './ApiDebug';
@@ -17,8 +16,7 @@ const AppRouter: React.FC = () => {
         <NavBar />
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<SimpleDashboard />} />
-          <Route path="/enhanced" element={<EnhancedDashboard />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/test" element={<TestConnection />} />
           <Route path="/debug" element={<ProjectDebug />} />
           <Route path="/api-debug" element={<ApiDebug />} />

@@ -57,21 +57,6 @@ const NavBar: React.FC = () => {
           >
             Dashboard
           </Button>
-          
-          <Button
-            component={Link}
-            to="/enhanced"
-            startIcon={<Assessment />}
-            color="inherit"
-            sx={{
-              bgcolor: isActive('/enhanced') ? 'rgba(255,255,255,0.1)' : 'transparent',
-              '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.1)',
-              },
-            }}
-          >
-            Enhanced Dashboard
-          </Button>
 
           <Button
             component={Link}
@@ -161,10 +146,6 @@ const NavBar: React.FC = () => {
             <MenuItem component={Link} to="/" onClick={handleMenuClose}>
               <Dashboard sx={{ mr: 1 }} />
               Dashboard
-            </MenuItem>
-            <MenuItem component={Link} to="/enhanced" onClick={handleMenuClose}>
-              <Assessment sx={{ mr: 1 }} />
-              Enhanced Dashboard
             </MenuItem>
             <MenuItem component={Link} to="/test" onClick={handleMenuClose}>
               <BugReport sx={{ mr: 1 }} />

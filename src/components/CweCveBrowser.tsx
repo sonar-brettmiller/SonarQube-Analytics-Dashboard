@@ -12,8 +12,7 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-  Tabs,
-  Tab,
+  Divider,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -31,33 +30,11 @@ import {
   Link as LinkIcon,
   Refresh
 } from '@mui/icons-material';
-import cweCveService, { type CweData, type CveData, type CweCveMapping } from '../services/cweCveService';
+import cweCveService, { type CweData, type CweCveMapping } from '../services/cweCveService';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`cwe-tabpanel-${index}`}
-      aria-labelledby={`cwe-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 const CweCveBrowser: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState(0);
   const [cweData, setCweData] = useState<CweData[]>([]);
   const [filteredCweData, setFilteredCweData] = useState<CweData[]>([]);
   const [selectedCwe, setSelectedCwe] = useState<CweCveMapping | null>(null);
@@ -105,10 +82,6 @@ const CweCveBrowser: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue);
   };
 
   const getSeverityColor = (severity: string) => {
@@ -430,23 +403,16 @@ const CweCveBrowser: React.FC = () => {
         </Alert>
       )}
 
-      <Tabs value={selectedTab} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tab label="CWE Database" />
-        <Tab label="CWE Details" />
-        <Tab label="Statistics" />
-      </Tabs>
-
-      <TabPanel value={selectedTab} index={0}>
-        {renderCweList()}
-      </TabPanel>
-
-      <TabPanel value={selectedTab} index={1}>
-        {renderCweDetails()}
-      </TabPanel>
-
-      <TabPanel value={selectedTab} index={2}>
-        {renderStatistics()}
-      </TabPanel>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={5} lg={4}>
+          {renderCweList()}
+        </Grid>
+        <Grid item xs={12} md={7} lg={8}>
+          {renderCweDetails()}
+          <Divider sx={{ my: 3 }} />
+          {renderStatistics()}
+        </Grid>
+      </Grid>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -16,6 +16,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   IconButton,
   Collapse,
   TextField,
@@ -27,14 +28,12 @@ import {
   Button,
   Stack,
   LinearProgress,
-  Divider,
-  Paper,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
+  
   Tooltip,
-  Badge
+  
 } from '@mui/material';
 import {
   Security,
@@ -49,14 +48,13 @@ import {
   TrendingDown,
   TrendingFlat,
   Shield,
-  SecurityUpdate,
   Assessment,
-  Timeline,
-  Category,
   KeyboardArrowUp,
-  KeyboardArrowDown
+  KeyboardArrowDown,
+  OpenInNew
 } from '@mui/icons-material';
 import { useSonarQube } from '../contexts/SonarQubeContext';
+import { useNavigate } from 'react-router-dom';
 import type { CweAnalysisData } from '../types/sonarqube';
 
 interface TabPanelProps {
@@ -83,6 +81,7 @@ function TabPanel(props: TabPanelProps) {
 
 const EnhancedCweAnalysis: React.FC = () => {
   const { apiService } = useSonarQube();
+  const navigate = useNavigate();
   const [cweData, setCweData] = useState<CweAnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,8 +90,32 @@ const EnhancedCweAnalysis: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [severityFilter, setSeverityFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [securityTrends, setSecurityTrends] = useState<any>(null);
   const [hotspotCategories, setHotspotCategories] = useState<any>(null);
+  const [projectFilter, setProjectFilter] = useState('all');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+
+  // Derived issues based on filters
+  const filteredIssues = useMemo(() => {
+    if (!cweData) return [] as any[];
+    return cweData.issues.filter(issue => {
+      const matchesSearch = issue.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           issue.rule.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSeverity = severityFilter === 'all' || issue.severity === severityFilter;
+      const matchesType = typeFilter === 'all' || issue.type === typeFilter;
+      const matchesProject = projectFilter === 'all' || issue.project === projectFilter;
+      return matchesSearch && matchesSeverity && matchesType && matchesProject;
+    });
+  }, [cweData, searchTerm, severityFilter, typeFilter, projectFilter]);
+
+  const paginatedIssues = useMemo(() => {
+    return filteredIssues.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [filteredIssues, page, rowsPerPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(0);
+  }, [searchTerm, severityFilter, typeFilter, projectFilter]);
 
   useEffect(() => {
     loadCweData();
@@ -109,14 +132,12 @@ const EnhancedCweAnalysis: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const [basicData, trends, categories] = await Promise.all([
+      const [basicData, categories] = await Promise.all([
         apiService.getEnhancedCweAnalysisData(),
-        apiService.getSecurityTrends(),
         apiService.getSecurityHotspotsByCategory()
       ]);
 
       setCweData(basicData);
-      setSecurityTrends(trends);
       setHotspotCategories(categories);
     } catch (err) {
       console.error('Error loading CWE data:', err);
@@ -497,7 +518,7 @@ const EnhancedCweAnalysis: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 CWE Categories Distribution
               </Typography>
-              <Typography variant="body2" color="textSecondary" paragraph>
+              <Typography variant="body2" color="textSecondary">
                 Breakdown of security issues by CWE category
               </Typography>
               
@@ -521,10 +542,7 @@ const EnhancedCweAnalysis: React.FC = () => {
                                 color="primary" 
                                 size="small"
                                 clickable
-                                onClick={() => {
-                                  // Navigate to CWE Browser with this CWE selected
-                                  window.open(`/cwe-browser?cwe=${cweNumber}`, '_blank');
-                                }}
+                                onClick={() => navigate(`/cwe-browser?cwe=${encodeURIComponent(cweNumber)}`)}
                               />
                             </Box>
                           }
@@ -554,7 +572,7 @@ const EnhancedCweAnalysis: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Rule to CWE Mappings
               </Typography>
-              <Typography variant="body2" color="textSecondary" paragraph>
+              <Typography variant="body2" color="textSecondary">
                 SonarQube rules mapped to CWE numbers with confidence levels
               </Typography>
               
@@ -575,9 +593,7 @@ const EnhancedCweAnalysis: React.FC = () => {
                                 color="secondary" 
                                 size="small"
                                 clickable
-                                onClick={() => {
-                                  window.open(`/cwe-browser?cwe=${cweNumber}`, '_blank');
-                                }}
+                                onClick={() => navigate(`/cwe-browser?cwe=${encodeURIComponent(String(cweNumber))}`)}
                               />
                             </Box>
                           }
@@ -630,65 +646,10 @@ const EnhancedCweAnalysis: React.FC = () => {
     }
   };
 
-  const renderSecurityTrends = () => {
-    if (!securityTrends) return null;
-
-    return (
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Security Trends Analysis
-              </Typography>
-              <Grid container spacing={2}>
-                {Object.entries(securityTrends).map(([metric, data]: [string, any]) => (
-                  <Grid item xs={12} md={4} key={metric}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="subtitle1" gutterBottom>
-                        {metric.replace(/_/g, ' ').toUpperCase()}
-                      </Typography>
-                      <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
-                        <Typography variant="h4" fontWeight="bold">
-                          {data.current || 0}
-                        </Typography>
-                        {data.change !== undefined && (
-                          <Stack direction="row" alignItems="center" spacing={0.5}>
-                            {getTrendIcon(data.trend)}
-                            <Typography 
-                              variant="body2" 
-                              color={data.change > 0 ? 'error' : 'success'}
-                            >
-                              {data.change > 0 ? '+' : ''}{data.change}
-                            </Typography>
-                          </Stack>
-                        )}
-                      </Stack>
-                      <Typography variant="caption" color="textSecondary">
-                        Current: {data.current || 0} | New: {data.new || 0}
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                ))}
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
+  // removed Security Trends tab per request
 
   const renderIssuesTable = () => {
     if (!cweData) return null;
-
-    const filteredIssues = cweData.issues.filter(issue => {
-      const matchesSearch = issue.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           issue.rule.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSeverity = severityFilter === 'all' || issue.severity === severityFilter;
-      const matchesType = typeFilter === 'all' || issue.type === typeFilter;
-      
-      return matchesSearch && matchesSeverity && matchesType;
-    });
 
     return (
       <Card>
@@ -757,23 +718,36 @@ const EnhancedCweAnalysis: React.FC = () => {
                 <MenuItem value="CODE_SMELL">Code Smell</MenuItem>
               </Select>
             </FormControl>
+            <FormControl sx={{ minWidth: 180 }}>
+              <InputLabel>Project</InputLabel>
+              <Select
+                value={projectFilter}
+                label="Project"
+                onChange={(e) => setProjectFilter(e.target.value)}
+              >
+                <MenuItem value="all">All</MenuItem>
+                {Array.from(new Set(cweData.issues.map(i => i.project))).map(p => (
+                  <MenuItem key={p} value={p}>{p}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Stack>
 
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ overflowX: 'auto', maxWidth: '100%' }}>
+            <Table sx={{ minWidth: 1200 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>Expand</TableCell>
-                  <TableCell>Severity</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Rule</TableCell>
-                  <TableCell>Message</TableCell>
-                  <TableCell>Project</TableCell>
-                  <TableCell>CWE</TableCell>
+                  <TableCell sx={{ width: 80 }}>Expand</TableCell>
+                  <TableCell sx={{ width: 100 }}>Severity</TableCell>
+                  <TableCell sx={{ width: 120 }}>Type</TableCell>
+                  <TableCell sx={{ width: 200 }}>Rule</TableCell>
+                  <TableCell sx={{ minWidth: 300 }}>Message</TableCell>
+                  <TableCell sx={{ width: 200 }}>Project</TableCell>
+                  <TableCell sx={{ width: 150 }}>CWE</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredIssues.map((issue) => (
+                {paginatedIssues.map((issue) => (
                   <React.Fragment key={issue.key}>
                     <TableRow>
                       <TableCell>
@@ -805,7 +779,7 @@ const EnhancedCweAnalysis: React.FC = () => {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" noWrap sx={{ maxWidth: 300 }}>
+                        <Typography variant="body2">
                           {issue.message}
                         </Typography>
                       </TableCell>
@@ -816,7 +790,7 @@ const EnhancedCweAnalysis: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         {issue.cweNumbers.length > 0 ? (
-                          <Stack direction="row" spacing={0.5}>
+                          <Stack direction="row" spacing={0.5} alignItems="center">
                             {issue.cweNumbers.slice(0, 2).map((cwe) => (
                               <Chip
                                 key={cwe}
@@ -825,9 +799,19 @@ const EnhancedCweAnalysis: React.FC = () => {
                                 color="primary"
                                 variant="outlined"
                                 clickable
-                                onClick={() => window.open(`/cwe-browser?cwe=${encodeURIComponent(cwe)}`, '_blank')}
+                                onClick={() => navigate(`/cwe-browser?cwe=${encodeURIComponent(cwe)}`)}
                               />
                             ))}
+                            <Tooltip title="View CVEs for this CWE on NVD">
+                              <IconButton
+                                size="small"
+                                aria-label="view cves on nvd"
+                                onClick={() => window.open(`https://nvd.nist.gov/vuln/search/results?adv_search=true&cwe_id=${encodeURIComponent(issue.cweNumbers[0])}`, '_blank')}
+                                sx={{ ml: 0.5 }}
+                              >
+                                <OpenInNew fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                             {issue.cweNumbers.length > 2 && (
                               <Chip
                                 label={`+${issue.cweNumbers.length - 2}`}
@@ -838,9 +822,14 @@ const EnhancedCweAnalysis: React.FC = () => {
                             )}
                           </Stack>
                         ) : (
-                          <Typography variant="caption" color="textSecondary">
-                            No CWE
-                          </Typography>
+                          <Stack direction="row" spacing={0.5} alignItems="center">
+                            <Typography variant="caption" color="textSecondary">
+                              No CWE
+                            </Typography>
+                            <Tooltip title="No CWE mapping available">
+                              <Info fontSize="small" color="disabled" />
+                            </Tooltip>
+                          </Stack>
                         )}
                       </TableCell>
                     </TableRow>
@@ -893,6 +882,25 @@ const EnhancedCweAnalysis: React.FC = () => {
                               </Box>
                             )}
                           </Box>
+                          <Box mt={2}>
+                            <Stack direction="row" spacing={1}>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => navigate(`/cwe-browser?cwe=${encodeURIComponent((issue.cweNumbers[0] || '').toString())}`)}
+                                disabled={issue.cweNumbers.length === 0}
+                              >
+                                View CWE Details
+                              </Button>
+                              <Button
+                                variant="text"
+                                size="small"
+                                onClick={() => window.open(`https://sonarcloud.io/project/issues?id=${encodeURIComponent(issue.project)}&open=${encodeURIComponent(issue.key)}`,'_blank')}
+                              >
+                                Open in SonarCloud
+                              </Button>
+                            </Stack>
+                          </Box>
                         </Collapse>
                       </TableCell>
                     </TableRow>
@@ -901,6 +909,15 @@ const EnhancedCweAnalysis: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            component="div"
+            count={filteredIssues.length}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+            rowsPerPageOptions={[10, 25, 50, 100]}
+          />
         </CardContent>
       </Card>
     );
@@ -946,7 +963,6 @@ const EnhancedCweAnalysis: React.FC = () => {
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tab label="Security Overview" />
         <Tab label="CWE Analysis" />
-        <Tab label="Security Trends" />
         <Tab label="Security Issues" />
       </Tabs>
 
@@ -959,10 +975,6 @@ const EnhancedCweAnalysis: React.FC = () => {
       </TabPanel>
 
       <TabPanel value={tabValue} index={2}>
-        {renderSecurityTrends()}
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={3}>
         {renderIssuesTable()}
       </TabPanel>
     </Box>
